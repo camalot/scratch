@@ -953,7 +953,15 @@
 						<onclick>RunAddon(plugin.video.genesis)</onclick>
 						<icon>-</icon>
 						<thumb>-</thumb>
-						<visible>System.Platform.Android + !Skin.HasSetting(HomeMenuNoAppsButton)</visible>
+						<visible>!Skin.HasSetting(HomeMenuNoAppsButton)</visible>
+					</item>
+					
+					<item id="8998">
+            <label>TV GUIDE</label>
+            <onclick>RunAddon(script.tvguidetecbox)</onclick>
+            <icon>-</icon>
+            <thumb>-</thumb>
+						<visible>!Skin.HasSetting(HomeMenuNoAppsButton)</visible>
 					</item>
 
 					<item id="9999">
