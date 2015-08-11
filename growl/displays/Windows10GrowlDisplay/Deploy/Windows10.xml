@@ -4,7 +4,7 @@
 	<author>Ryan Conrad</author>
 	<version>1.0</version>
 	<packageurl>
-		
+		https://github.com/camalot/scratch/releases/download/G4W10-v1.0.0/Windows10.zip
 	</packageurl>
 	<description>
 		<![CDATA[A simple display that matches the Windows 10 look and feel.]]>
