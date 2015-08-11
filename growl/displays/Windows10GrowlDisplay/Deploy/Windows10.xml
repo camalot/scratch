@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<display>
+	<name>Win10</name>
+	<author>Ryan Conrad</author>
+	<version>1.0</version>
+	<packageurl>
+		
+	</packageurl>
+	<description>
+		<![CDATA[A simple display that matches the Windows 10 look and feel.]]>
+	</description>
+</display>

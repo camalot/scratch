@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <window>
 	<defaultcontrol always="true">9000</defaultcontrol>
-	<allowoverlay>no</allowoverlay>	
+	<allowoverlay>no</allowoverlay>
 	<onunload condition="Container(9000).Hasfocus(10) | Container(9000).Hasfocus(11) | ControlGroup(9010).HasFocus | ControlGroup(9016).HasFocus | ControlGroup(9017).HasFocus">SetProperty(VideosDirectLink,True)</onunload>
 	<onunload condition="Control.HasFocus(9000) + Container(9000).Hasfocus(2)">ClearProperty(VideosDirectLink)</onunload>
 	<controls>
@@ -657,17 +657,17 @@
 						<onclick>RunAddon(plugin.video.genesis)</onclick>
 						<icon>-</icon>
 						<thumb>-</thumb>
-						<visible>!Skin.HasSetting(HomeMenuNoAppsButton)</visible>
+						<visible>System.HasAddon(plugin.video.genesis)</visible>
 					</item>
-					
+
 					<item id="8998">
             <label>TV GUIDE</label>
             <onclick>RunAddon(script.tvguidetecbox)</onclick>
             <icon>-</icon>
             <thumb>-</thumb>
-						<visible>!Skin.HasSetting(HomeMenuNoAppsButton)</visible>
+						<visible>System.HasAddon(script.tvguidetecbox)</visible>
 					</item>
-					
+
 					<item id="9999">
 						<label>ANDROID APPS</label>
 						<onclick>ActivateWindow(Programs,androidapp://sources/apps/,return)</onclick>
@@ -675,7 +675,7 @@
 						<thumb>-</thumb>
 						<visible>System.Platform.Android + !Skin.HasSetting(HomeMenuNoAppsButton)</visible>
 					</item>
-					
+
 					<item id="1">
 						<label>31957</label>
 						<onclick condition="!System.Platform.Android">ActivateWindow(Programs,Addons,return)</onclick>
@@ -904,5 +904,5 @@
 			<include>Window_OpenClose_Animation</include>
 			<animation effect="slide" start="0,0" end="-40,0" time="100" condition="Window.IsVisible(Mutebug)">conditional</animation>
 		</control>
-	</controls>	
+	</controls>
 </window>
