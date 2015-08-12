@@ -37,23 +37,22 @@ namespace Growl.Display.Windows10 {
 		public override string Website { get { return "http://bit13.com"; } }
 
 		protected override void HandleNotification ( Notification notification, string displayName ) {
-
-			bool flag = false;
+			var location = this.GetLocationFromSetting ( );
+      bool flag = false;
 			if ( !string.IsNullOrEmpty ( notification.CoalescingGroup ) ) {
 				foreach ( NotificationWindow activeWindow in base.ActiveWindows ) {
 					if ( activeWindow.CoalescingGroup != notification.CoalescingGroup ) {
 						continue;
 					}
-						( (WindowsGrowlNotificationWindow)activeWindow ).Replace ( notification );
+					( (WindowsGrowlNotificationWindow)activeWindow ).Replace ( notification, location );
 					flag = true;
 					break;
 				}
 			}
 			if ( !flag ) {
-				WindowsGrowlNotificationWindow visualWindow = new WindowsGrowlNotificationWindow ( );
+				var visualWindow = new WindowsGrowlNotificationWindow ( location );
 				visualWindow.SetNotification ( notification );
 				visualWindow.BackColor = BGCOLOR;
-				visualWindow.SetDisplayLocation ( this.GetLocationFromSetting ( ) );
 				visualWindow.PreferredDevice = base.GetPreferredDisplay ( );
 				base.Show ( visualWindow );
 			}
@@ -74,7 +73,7 @@ namespace Growl.Display.Windows10 {
 		private WindowsGrowlVisualDisplayLocation GetLocationFromSetting ( ) {
 			var location = WindowsGrowlVisualDisplayLocation.BottomRight;
 			var settings = base.SettingsPanel.GetSettings ( );
-      if ( settings != null && settings.ContainsKey ( WindowsGrowlDisplaySettings.SETTING_DISPLAYLOCATION ) ) {
+			if ( settings != null && settings.ContainsKey ( WindowsGrowlDisplaySettings.SETTING_DISPLAYLOCATION ) ) {
 				try {
 					object item = settings[WindowsGrowlDisplaySettings.SETTING_DISPLAYLOCATION];
 					if ( item != null ) {

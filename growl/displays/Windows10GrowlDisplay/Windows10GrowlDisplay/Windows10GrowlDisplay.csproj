@@ -54,6 +54,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Win32AnimatorEx.cs" />
     <Compile Include="WindowsGrowlDisplaySettings.cs">
       <SubType>UserControl</SubType>
     </Compile>

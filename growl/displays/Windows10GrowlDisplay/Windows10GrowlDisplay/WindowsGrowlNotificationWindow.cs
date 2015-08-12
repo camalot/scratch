@@ -10,17 +10,20 @@ using Growl.DisplayStyle;
 
 namespace Growl.Display.Windows10 {
 	public partial class WindowsGrowlNotificationWindow : NotificationWindow {
-		private WindowsGrowlVisualDisplayLocation location = WindowsGrowlVisualDisplayLocation.BottomRight;
 		private Screen preferredDeviceName;
-		public WindowsGrowlNotificationWindow ( ) {
+		public WindowsGrowlNotificationWindow ( WindowsGrowlVisualDisplayLocation displayLocation ) {
 			InitializeComponent ( );
 			this.AfterLoad += WindowsGrowlNotificationWindow_AfterLoad;
 			this.AutoClosing += WindowsGrowlNotificationWindow_AutoClosing;
 			this.BeforeShown += WindowsGrowlNotificationWindow_BeforeShown;
-			base.Animator = new Win32Animator ( this, Win32Animator.AnimationMethod.Blend, Win32Animator.AnimationDirection.Left, 500 );
+			this.DisplayLocation = displayLocation;
+			var dIn = this.DisplayLocation == WindowsGrowlVisualDisplayLocation.TopLeft || this.DisplayLocation == WindowsGrowlVisualDisplayLocation.BottomLeft ? Win32AnimatorEx.AnimationDirection.Right : Win32AnimatorEx.AnimationDirection.Left;
+			var dOut = this.DisplayLocation == WindowsGrowlVisualDisplayLocation.TopLeft || this.DisplayLocation == WindowsGrowlVisualDisplayLocation.BottomLeft ? Win32AnimatorEx.AnimationDirection.Left : Win32AnimatorEx.AnimationDirection.Right;
+
+			Animator = new Win32AnimatorEx ( this, Win32AnimatorEx.AnimationMethod.Slide, dIn, dOut, 500 );
 			HookUpClickEvents ( this );
 			base.SetAutoCloseInterval ( 4000 );
-    }
+		}
 
 		private void WindowsGrowlNotificationWindow_BeforeShown ( object sender, EventArgs e ) {
 
@@ -39,18 +42,18 @@ namespace Growl.Display.Windows10 {
 			var topYLocation = this.PreferredDevice.WorkingArea.Top;
 			var bottomYLocation = this.PreferredDevice.WorkingArea.Bottom;
 			base.Location = new Point ( width, height );
-			switch ( this.location ) {
+			switch ( this.DisplayLocation ) {
 				case WindowsGrowlVisualDisplayLocation.TopLeft:
-						base.Location = new Point ( leftXLocation, topYLocation );
-						return;
+					base.Location = new Point ( leftXLocation, topYLocation );
+					return;
 				case WindowsGrowlVisualDisplayLocation.TopRight:
-						base.Location = new Point ( rightXLocation, topYLocation );
-						return;
+					base.Location = new Point ( rightXLocation, topYLocation );
+					return;
 				case WindowsGrowlVisualDisplayLocation.BottomLeft:
-						base.Location = new Point ( leftXLocation, bottomYLocation - base.Height );
-						return;
+					base.Location = new Point ( leftXLocation, bottomYLocation - base.Height - 30 );
+					return;
 			}
-			base.Location = new Point ( rightXLocation, bottomYLocation - base.Height - 30);
+			base.Location = new Point ( rightXLocation, bottomYLocation - base.Height - 30 );
 		}
 
 		public override void SetNotification ( Notification n ) {
@@ -77,29 +80,29 @@ namespace Growl.Display.Windows10 {
 
 		}
 
-		public WindowsGrowlVisualDisplayLocation DisplayLocation {
-			get {
-				return this.location;
-			}
-		}
+		public WindowsGrowlVisualDisplayLocation DisplayLocation { get; private set; } = WindowsGrowlVisualDisplayLocation.BottomRight;
 
-		public void Replace ( Notification n ) {
+		public void Replace ( Notification n, WindowsGrowlVisualDisplayLocation location ) {
 			this.Replaced = true;
+			this.DisplayLocation = location;
+			this.OnAfterLoad ( this, EventArgs.Empty );
+
+			var dIn = this.DisplayLocation == WindowsGrowlVisualDisplayLocation.TopLeft || this.DisplayLocation == WindowsGrowlVisualDisplayLocation.BottomLeft ? Win32AnimatorEx.AnimationDirection.Right : Win32AnimatorEx.AnimationDirection.Left;
+			var dOut = this.DisplayLocation == WindowsGrowlVisualDisplayLocation.TopLeft || this.DisplayLocation == WindowsGrowlVisualDisplayLocation.BottomLeft ? Win32AnimatorEx.AnimationDirection.Left : Win32AnimatorEx.AnimationDirection.Right;
+			Animator = new Win32AnimatorEx ( this, Win32AnimatorEx.AnimationMethod.Slide, dIn, dOut, 500 );
+			
 			base.StopAutoCloseTimer ( );
 			this.SetNotification ( n );
 			this.Show ( );
 			this.OnShown ( EventArgs.Empty );
+
+
 			base.StartAutoCloseTimer ( );
 		}
 
 		protected override void OnShown ( EventArgs e ) {
 			base.OnShown ( e );
 		}
-
-		public void SetDisplayLocation ( WindowsGrowlVisualDisplayLocation location ) {
-			this.location = location;
-		}
-
 		private void title_LabelHeightChanged ( ExpandingLabel.LabelHeightChangedEventArgs args ) {
 			this.icon.Top += args.HeightChange;
 			this.description.Top += args.HeightChange;
