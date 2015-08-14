@@ -11,16 +11,18 @@ using Growl.DisplayStyle;
 namespace Growl.Display.Windows10 {
 	public partial class WindowsGrowlNotificationWindow : NotificationWindow {
 		private Screen preferredDeviceName;
-		public WindowsGrowlNotificationWindow ( WindowsGrowlVisualDisplayLocation displayLocation ) {
+		public WindowsGrowlNotificationWindow ( WindowsGrowlVisualDisplayLocation displayLocation, int speed ) {
 			InitializeComponent ( );
 			this.AfterLoad += WindowsGrowlNotificationWindow_AfterLoad;
 			this.AutoClosing += WindowsGrowlNotificationWindow_AutoClosing;
 			this.BeforeShown += WindowsGrowlNotificationWindow_BeforeShown;
 			this.DisplayLocation = displayLocation;
+			this.Speed = speed;
+
 			var dIn = this.DisplayLocation == WindowsGrowlVisualDisplayLocation.TopLeft || this.DisplayLocation == WindowsGrowlVisualDisplayLocation.BottomLeft ? Win32AnimatorEx.AnimationDirection.Right : Win32AnimatorEx.AnimationDirection.Left;
 			var dOut = this.DisplayLocation == WindowsGrowlVisualDisplayLocation.TopLeft || this.DisplayLocation == WindowsGrowlVisualDisplayLocation.BottomLeft ? Win32AnimatorEx.AnimationDirection.Left : Win32AnimatorEx.AnimationDirection.Right;
 
-			Animator = new Win32AnimatorEx ( this, Win32AnimatorEx.AnimationMethod.Slide, dIn, dOut, 500 );
+			Animator = new Win32AnimatorEx ( this, Win32AnimatorEx.AnimationMethod.Slide, dIn, dOut, this.Speed );
 			HookUpClickEvents ( this );
 			base.SetAutoCloseInterval ( 4000 );
 		}
@@ -81,16 +83,18 @@ namespace Growl.Display.Windows10 {
 		}
 
 		public WindowsGrowlVisualDisplayLocation DisplayLocation { get; private set; } = WindowsGrowlVisualDisplayLocation.BottomRight;
-
-		public void Replace ( Notification n, WindowsGrowlVisualDisplayLocation location ) {
+		public int Speed { get; set; } = SettingsHelper.DEFAULT_SPEED;
+		public void Replace ( Notification n, WindowsGrowlVisualDisplayLocation location, int newSpeed ) {
 			this.Replaced = true;
 			this.DisplayLocation = location;
 			this.OnAfterLoad ( this, EventArgs.Empty );
 
+			this.Speed = newSpeed;
+
 			var dIn = this.DisplayLocation == WindowsGrowlVisualDisplayLocation.TopLeft || this.DisplayLocation == WindowsGrowlVisualDisplayLocation.BottomLeft ? Win32AnimatorEx.AnimationDirection.Right : Win32AnimatorEx.AnimationDirection.Left;
 			var dOut = this.DisplayLocation == WindowsGrowlVisualDisplayLocation.TopLeft || this.DisplayLocation == WindowsGrowlVisualDisplayLocation.BottomLeft ? Win32AnimatorEx.AnimationDirection.Left : Win32AnimatorEx.AnimationDirection.Right;
-			Animator = new Win32AnimatorEx ( this, Win32AnimatorEx.AnimationMethod.Slide, dIn, dOut, 500 );
-			
+			Animator = new Win32AnimatorEx ( this, Win32AnimatorEx.AnimationMethod.Slide, dIn, dOut, this.Speed );
+
 			base.StopAutoCloseTimer ( );
 			this.SetNotification ( n );
 			this.Show ( );
@@ -123,6 +127,24 @@ namespace Growl.Display.Windows10 {
 			}
 			set {
 				this.preferredDeviceName = value;
+			}
+		}
+
+		public Color TitleColor {
+			get {
+				return this.title.ForeColor;
+			}
+			set {
+				this.title.ForeColor = value;
+			}
+		}
+
+		public Color DescriptionColor {
+			get {
+				return this.description.ForeColor;
+			}
+			set {
+				this.description.ForeColor = value;
 			}
 		}
 	}

@@ -54,6 +54,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SettingsHelper.cs" />
     <Compile Include="Win32AnimatorEx.cs" />
     <Compile Include="WindowsGrowlDisplaySettings.cs">
       <SubType>UserControl</SubType>
@@ -71,6 +72,9 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WindowsGrowlDisplaySettings.resx">
+      <DependentUpon>WindowsGrowlDisplaySettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WindowsGrowlNotificationWindow.resx">
       <DependentUpon>WindowsGrowlNotificationWindow.cs</DependentUpon>

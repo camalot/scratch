@@ -14,8 +14,6 @@ namespace Growl.Display.Windows10 {
 		private LayoutManager brlm = new LayoutManager ( LayoutManager.AutoPositionDirection.UpLeft, 5, 5 );
 		private LayoutManager lm = new LayoutManager ( LayoutManager.AutoPositionDirection.UpLeft, 10, 10 );
 
-		public static Color BGCOLOR = Color.FromArgb ( 31, 31, 31 );
-
 		public WindowsGrowlVisualDisplay ( ) {
 			base.SettingsPanel = new WindowsGrowlDisplaySettings ( );
 		}
@@ -37,22 +35,25 @@ namespace Growl.Display.Windows10 {
 		public override string Website { get { return "http://bit13.com"; } }
 
 		protected override void HandleNotification ( Notification notification, string displayName ) {
-			var location = this.GetLocationFromSetting ( );
-      bool flag = false;
+			var location = SettingsHelper.GetLocationFromSetting ( SettingsPanel );
+			var speed = SettingsHelper.GetSpeedFromSetting ( SettingsPanel );
+			bool flag = false;
 			if ( !string.IsNullOrEmpty ( notification.CoalescingGroup ) ) {
 				foreach ( NotificationWindow activeWindow in base.ActiveWindows ) {
 					if ( activeWindow.CoalescingGroup != notification.CoalescingGroup ) {
 						continue;
 					}
-					( (WindowsGrowlNotificationWindow)activeWindow ).Replace ( notification, location );
+					( (WindowsGrowlNotificationWindow)activeWindow ).Replace ( notification, location, speed );
 					flag = true;
 					break;
 				}
 			}
 			if ( !flag ) {
-				var visualWindow = new WindowsGrowlNotificationWindow ( location );
+				var visualWindow = new WindowsGrowlNotificationWindow ( location, speed );
 				visualWindow.SetNotification ( notification );
-				visualWindow.BackColor = BGCOLOR;
+				visualWindow.BackColor = SettingsHelper.GetBackColorFromSetting ( SettingsPanel );
+				visualWindow.TitleColor = SettingsHelper.GetTitleColorFromSetting ( SettingsPanel );
+				visualWindow.DescriptionColor = SettingsHelper.GetDescColorFromSetting ( SettingsPanel );
 				visualWindow.PreferredDevice = base.GetPreferredDisplay ( );
 				base.Show ( visualWindow );
 			}
@@ -70,19 +71,6 @@ namespace Growl.Display.Windows10 {
 			return this.brlm;
 		}
 
-		private WindowsGrowlVisualDisplayLocation GetLocationFromSetting ( ) {
-			var location = WindowsGrowlVisualDisplayLocation.BottomRight;
-			var settings = base.SettingsPanel.GetSettings ( );
-			if ( settings != null && settings.ContainsKey ( WindowsGrowlDisplaySettings.SETTING_DISPLAYLOCATION ) ) {
-				try {
-					object item = settings[WindowsGrowlDisplaySettings.SETTING_DISPLAYLOCATION];
-					if ( item != null ) {
-						location = (WindowsGrowlVisualDisplayLocation)item;
-					}
-				} catch {
-				}
-			}
-			return location;
-		}
+
 	}
 }
