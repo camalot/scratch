@@ -7,7 +7,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Windows10GrowlDisplay", "Wi
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3rdParty", "3rdParty", "{D1916139-D30C-4247-9662-792D56CE10B2}"
 	ProjectSection(SolutionItems) = preProject
+		3rdParty\Growl.Connector.dll = 3rdParty\Growl.Connector.dll
 		3rdParty\Growl.CoreLibrary.dll = 3rdParty\Growl.CoreLibrary.dll
+		3rdParty\Growl.Destinations.dll = 3rdParty\Growl.Destinations.dll
 		3rdParty\Growl.DisplayStyle.dll = 3rdParty\Growl.DisplayStyle.dll
 	EndProjectSection
 EndProject
@@ -16,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deploy", "Deploy", "{B4A8BE
 		Deploy\deploy.msbuild = Deploy\deploy.msbuild
 		Deploy\Windows10.xml = Deploy\Windows10.xml
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Windows10GrowlForwarder", "Windows10GrowlForwarder\Windows10GrowlForwarder.csproj", "{CD1C3276-FA1D-42D2-B4D4-E08AA94727F5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +31,10 @@ Global
 		{F3216145-92E8-4D2B-A447-3CDADDFE2EC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F3216145-92E8-4D2B-A447-3CDADDFE2EC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F3216145-92E8-4D2B-A447-3CDADDFE2EC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD1C3276-FA1D-42D2-B4D4-E08AA94727F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD1C3276-FA1D-42D2-B4D4-E08AA94727F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD1C3276-FA1D-42D2-B4D4-E08AA94727F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD1C3276-FA1D-42D2-B4D4-E08AA94727F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
