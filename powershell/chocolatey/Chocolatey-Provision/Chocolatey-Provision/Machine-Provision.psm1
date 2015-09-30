@@ -81,25 +81,52 @@ function Invoke-ProvisionInstall {
 	);
 	Check-RunAsAdministrator;
 
-	switch($Source) {
-		"install" {
+	switch -regex ($Source) {
+		"^([Cc]hocolatey|install)$" {
 			$cho = Get-ChocolateyExe;
-			if($Version -ne $null -and $Source -ieq "install") {
+			if($Version -ne $null) {
 				& $cho install $Name -version $Version -y;
 			} else {
-				& $cho $Source $Name -y;
+				& $cho install $Name -y;
 			}
 		};
-		"webpi" {
+		"^webpi$" {
 			$wpi = Get-WebPiExe;
 			& $wpi /Install /Products:$Name;
 		};
-		"windowsFeatures" {
+		"^windows[fF]eatures$" {
 			$dism = Get-DismExe;
 			& $dism /online /Enable-Feature /FeatureName:$Name /All;
 		};
 	}
 
+}
+
+function Invoke-ProvisionUninstall {
+	Param (
+		[Parameter(Mandatory=$true, Position=0)]
+		[Alias("n")]
+		[string] $Name,
+		[Parameter(Mandatory=$false, Position=1)]
+		[Alias("s")]
+		[string] $Source = "install"
+	);
+
+	Check-RunAsAdministrator;
+
+	switch($Source) {
+		"^([Cc]hocolatey|install)$" {
+			$cho = Get-ChocolateyExe;
+			& $cho uninstall $Name -version $Version -y;
+		};
+		"^webpi$" {
+			throw "Uninstall from WebPI is not implemented.";
+		};
+		"^windows[fF]eatures$" {
+			$dism = Get-DismExe;
+			& $dism /online /Disable-Feature /FeatureName:$Name;
+		};
+	}
 }
 
 function Get-AvailableWindowsFeatures {
@@ -199,7 +226,7 @@ function Get-InstalledChocolateyPackages {
 	$packages = [System.Collections.ArrayList]@();
 	Write-Host "Gathering installed chocolatey packages..."
 	& $cho list -lo | foreach {
-		if($_ -inotmatch "^\d+\spackages\(found|installed)\.$") {
+		if($_ -inotmatch "^\d+\spackages\s(found|installed)\.$") {
 			$id = Select-String -InputObject $_ -Pattern "^([\S]+)" -AllMatches | % { $_.Matches } | % { $_.Value };
 			$ver = (Select-String -InputObject $_ -Pattern "\s([\S]+)\s?$" -AllMatches | % { $_.Matches } | % { $_.Value }) -replace "\s","";
 			$packages.Add( [PSCustomObject]@{
@@ -220,7 +247,7 @@ function Get-AvailableChocolateyPackages {
 	$packages = [System.Collections.ArrayList]@();
 	Write-Host "Gathering packages from Chocolatey repositories. This will take a little time..."
 	& $cho list | foreach {
-		if($_ -inotmatch "^\d+\spackages\(found|installed)\.$") {
+		if($_ -inotmatch "^\d+\spackages\s(found|installed)\.$") {
 			$id = Select-String -InputObject $_ -Pattern "^([\S]+)" -AllMatches | % { $_.Matches } | % { $_.Value };
 			$ver = (Select-String -InputObject $_ -Pattern "\s([\S]+)\s?$" -AllMatches | % { $_.Matches } | % { $_.Value }) -replace "\s","";
 			$packages.Add( [PSCustomObject]@{
@@ -311,7 +338,7 @@ function Find-ProvisionPackages {
 
 	(( $wpi | Select-Object ID, Source, Category ) + 
 		( $wf |  Select-Object ID, Source, Category ) + 
-		( $choco | Select-Object ID, Source, Version, Category ) ) | sort { $_.Source, $_.ID } 
+		( $choco | Select-Object ID, Source, Version, Category ) ) | sort { $_.Source, $_.Category, $_.ID };
 }
 
 function Check-RunAsAdministrator {
