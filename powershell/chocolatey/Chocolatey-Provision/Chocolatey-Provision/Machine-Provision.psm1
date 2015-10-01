@@ -2,10 +2,18 @@
 	
 #>
 
+function Invoke-InstallChocolatey {
+	iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1')) | Write-Host;
+}
+
 function Get-ChocolateyExe {
 	$cho = "$env:ProgramData\chocolatey\choco.exe";
 	if(!(Test-Path -Path $cho) ) {
-		throw [System.ArgumentException] "Unable to locate chocolatey.";
+		Write-Host -BackgroundColor Red -ForegroundColor White "Unable to locate chocolatey. Installing chocolatey...";
+		Invoke-InstallChocolatey;
+		if(!(Test-Path -Path $cho) ) {
+			throw [System.IO.FileNotFoundException] "Still unable to locate chocolatey, even after install attempt."
+		}
 	}
 	return $cho;
 }
@@ -19,9 +27,15 @@ function Get-DismExe {
 }
 
 function Get-WebPiExe {
-	$wpi = @("$env:ProgramFiles\microsoft\web platform installer\webpicmd.exe", "${env:ProgramFiles(x86)}\microsoft\web platform installer\webpicmd.exe", "webpicmd.exe") | where { Test-Path -Path $_ } | Select-Object -First 1;
-	if($wpi -eq $null) {
-		throw [System.ArgumentException] "Unable to locate webpicmd.exe";
+	$wpi = @("$env:ProgramFiles\microsoft\web platform installer\webpicmd.exe", "${env:ProgramFiles(x86)}\microsoft\web platform installer\webpicmd.exe", "webpicmd.exe");
+	$wpiloc = $wpi | where { Test-Path -Path $_ } | Select-Object -First 1;
+	if($wpiloc -eq $null) {
+		Write-Host -BackgroundColor Red -ForegroundColor White "Unable to locate webpi. Installing webpi...";
+		Invoke-ProvisionInstall -Name "webpi" -Source "Chocolatey";
+		$wpiloc = $wpi | where { Test-Path -Path $_ } | Select-Object -First 1;
+		if($wpiloc -eq $null) {
+			throw [System.IO.FileNotFoundException] "Still unable to locate webpi, even after install attempt."
+		}
 	}
 	return $wpi;
 }
@@ -41,7 +55,12 @@ function Invoke-ProvisionRestore {
 
 	Check-RunAsAdministrator;
 	$configFile = (Get-Item -Path $FilePath);
-	[xml]$config = (Get-Content $configFile.FullName -Raw);
+
+	if(!(Test-Path -Path $configFile)) {
+		throw [System.IO.FileNotFoundException] "Unable to locate config file: '$configFile'";
+	}
+
+	[xml]$config = (Get-Content $configFile.FullName);
 
 	$packagesList = $config.DocumentElement.SelectNodes("package") | where { $_.id -ne "Chocolatey"; };
 	if($gui -eq $true) {
@@ -49,7 +68,7 @@ function Invoke-ProvisionRestore {
 			try {
 				$version = @{$true=$_.version;$false=""}[$SpecificVersion -eq $true];
 				Invoke-ProvisionInstall -Name $_.id -Version $version -Source $_.source;
-				"Invoke-ProvisionInstall: -Name " + $_.id + " -Version " + $version + " -Source " + $_.source;
+				Write-Host "Invoke-ProvisionInstall: -Name ${_.id} -Version " + $version + " -Source " + $_.source;
 			} catch [System.Exception] {
 				Write-Error -Exception $_.Exception;
 			}
@@ -59,7 +78,7 @@ function Invoke-ProvisionRestore {
 			try {
 				$version = @{$true=$_.version;$false=""}[$SpecificVersion -eq $true];
 				Invoke-ProvisionInstall -Name $_.id -Version $version -Source $_.source;
-				"Invoke-ProvisionInstall: -Name " + $_.id + " -Version " + $version + " -Source " + $_.source;
+				Write-Host "Invoke-ProvisionInstall: -Name ${_.id} -Version " + $version + " -Source " + $_.source;
 			} catch [System.Exception] {
 				Write-Error -Exception $_.Exception;
 			}
@@ -84,7 +103,7 @@ function Invoke-ProvisionInstall {
 	switch -regex ($Source) {
 		"^([Cc]hocolatey|install)$" {
 			$cho = Get-ChocolateyExe;
-			if($Version -ne $null) {
+			if($Version -ne $null -and $Version -ne "" ) {
 				& $cho install $Name -version $Version -y;
 			} else {
 				& $cho install $Name -y;
