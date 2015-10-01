@@ -108,18 +108,18 @@ function Invoke-ProvisionInstall {
 		"^([Cc]hocolatey|install)$" {
 			$cho = Get-ChocolateyExe;
 			if($Version -ne $null -and $Version -ne "" ) {
-				& $cho install $Name -version $Version -y;
+				& $cho install $Name -version $Version -y | Write-Host | Wait-Process;
 			} else {
-				& $cho install $Name -y;
+				& $cho install $Name -y | Write-Host | Wait-Process;
 			}
 		};
 		"^webpi$" {
 			$wpi = Get-WebPiExe;
-			& $wpi /Install /Products:$Name;
+			& $wpi /Install /Products:$Name | Write-Host | Wait-Process (Get-Process webpicmd).id;
 		};
 		"^windows[fF]eatures$" {
 			$dism = Get-DismExe;
-			& $dism /online /Enable-Feature /FeatureName:$Name /All;
+			& $dism /online /Enable-Feature /FeatureName:$Name /All | Write-Host | Wait-Process (Get-Process dism).id;
 		};
 	}
 
