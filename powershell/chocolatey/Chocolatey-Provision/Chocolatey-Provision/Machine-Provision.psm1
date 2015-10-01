@@ -67,8 +67,10 @@ function Invoke-ProvisionRestore {
 		$packagesList | Out-GridView -PassThru -Title "Select Packages" | foreach { 
 			try {
 				$version = @{$true=$_.version;$false=""}[$SpecificVersion -eq $true];
-				Invoke-ProvisionInstall -Name $_.id -Version $version -Source $_.source;
-				Write-Host "Invoke-ProvisionInstall: -Name ${_.id} -Version " + $version + " -Source " + $_.source;
+				$id = $_.id;
+				$source = $_.source;
+				Invoke-ProvisionInstall -Name $id -Version $version -Source $_.source;
+				Write-Host "Invoke-ProvisionInstall: -Name $id -Version $version -Source $source";
 			} catch [System.Exception] {
 				Write-Error -Exception $_.Exception;
 			}
@@ -77,8 +79,10 @@ function Invoke-ProvisionRestore {
 		$packagesList | foreach { 
 			try {
 				$version = @{$true=$_.version;$false=""}[$SpecificVersion -eq $true];
-				Invoke-ProvisionInstall -Name $_.id -Version $version -Source $_.source;
-				Write-Host "Invoke-ProvisionInstall: -Name ${_.id} -Version " + $version + " -Source " + $_.source;
+				$id = $_.id;
+				$source = $_.source;
+				Invoke-ProvisionInstall -Name $id -Version $version -Source $_.source;
+				Write-Host "Invoke-ProvisionInstall: -Name $id -Version $version -Source $source";
 			} catch [System.Exception] {
 				Write-Error -Exception $_.Exception;
 			}
