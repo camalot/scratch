@@ -64,7 +64,7 @@ function Invoke-ProvisionRestore {
 
 	$packagesList = $config.DocumentElement.SelectNodes("package") | where { $_.id -ne "Chocolatey"; };
 	if($gui -eq $true) {
-		$packagesList | Out-GridView -PassThru -Title "Select Packages" | foreach { 
+		$packagesList | Out-GridView -PassThru -Title "Select Packages" | sort { $_.source } -Descending | foreach { 
 			try {
 				$version = @{$true=$_.version;$false=""}[$SpecificVersion -eq $true];
 				$id = $_.id;
@@ -76,7 +76,7 @@ function Invoke-ProvisionRestore {
 			}
 		}
 	} else {
-		$packagesList | foreach { 
+		$packagesList | sort { $_.source } -Descending | foreach { 
 			try {
 				$version = @{$true=$_.version;$false=""}[$SpecificVersion -eq $true];
 				$id = $_.id;
