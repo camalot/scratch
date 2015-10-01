@@ -69,8 +69,8 @@ function Invoke-ProvisionRestore {
 				$version = @{$true=$_.version;$false=""}[$SpecificVersion -eq $true];
 				$id = $_.id;
 				$source = $_.source;
-				Invoke-ProvisionInstall -Name $id -Version $version -Source $_.source;
 				Write-Host "Invoke-ProvisionInstall: -Name $id -Version $version -Source $source";
+				Invoke-ProvisionInstall -Name $id -Version $version -Source $_.source;
 			} catch [System.Exception] {
 				Write-Error -Exception $_.Exception;
 			}
@@ -81,8 +81,8 @@ function Invoke-ProvisionRestore {
 				$version = @{$true=$_.version;$false=""}[$SpecificVersion -eq $true];
 				$id = $_.id;
 				$source = $_.source;
-				Invoke-ProvisionInstall -Name $id -Version $version -Source $_.source;
 				Write-Host "Invoke-ProvisionInstall: -Name $id -Version $version -Source $source";
+				Invoke-ProvisionInstall -Name $id -Version $version -Source $_.source;
 			} catch [System.Exception] {
 				Write-Error -Exception $_.Exception;
 			}
