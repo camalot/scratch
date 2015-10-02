@@ -43,6 +43,31 @@ function Get-DismAll {
 	return @{$true="/All";$false=""}[(Get-OSVersion).BuildNumber -ge 9200];
 }
 
+function Invoke-DismInstall {
+	Param (
+		[Parameter(Mandatory=$true, Position=0)]
+		[Alias("f")]
+		[string[]] $Features
+	)
+	$dism = Get-DismExe;
+	$dall = (Get-DismAll);
+
+	# filter out features that are not available.
+	$available = (Get-AvailableWindowsFeatures | where { $_.Enabled -eq $false; } | select -ExpandProperty id);
+	$newFeatures = [System.Collections.ArrayList]@();
+	$Features | foreach {
+		$x = $_;
+		if($available -contains $x) {
+			$newFeatures.Add($x) | Out-Null;
+		}
+	}
+
+	# DISM can enable multiple features in one block.	
+	$featureOptions = $newFeatures -join ",";
+	Write-Host "$dism /Online /Enable-Feature /FeatureName:$featureOptions /NoRestart $dall";
+	& $dism /Online /Enable-Feature $featureOptions /NoRestart $dall | Write-Host;
+}
+
 function Get-WebPiExe {
 	$wpi = @("$env:ProgramFiles\microsoft\web platform installer\webpicmd.exe", "${env:ProgramFiles(x86)}\microsoft\web platform installer\webpicmd.exe", "webpicmd.exe");
 	$wpiloc = $wpi | where { Test-Path -Path $_ } | Select-Object -First 1;
@@ -81,7 +106,7 @@ function Invoke-ProvisionRestore {
 
 	$packagesList = $config.DocumentElement.SelectNodes("package") | where { $_.id -ne "Chocolatey"; };
 	if($gui -eq $true) {
-		$packagesList | where { $_.source -inotmatch "^windows[Ff]eature$" } | Out-GridView -PassThru -Title "Select Packages" | foreach { 
+		$packagesList | where { $_.source -notmatch "^windows[Ff]eature$" } | Out-GridView -PassThru -Title "Select Packages" | foreach { 
 			try {
 				$version = @{$true=$_.version;$false=""}[$SpecificVersion -eq $true];
 				$id = $_.id;
@@ -94,7 +119,7 @@ function Invoke-ProvisionRestore {
 		};
 	} else {
 		# filter out windows features because they can be bundled.
-		$packagesList | where { $_.source -inotmatch "^windows[Ff]eature$" } | foreach { 
+		$packagesList | where { $_.source -notmatch "^windows[Ff]eature$" } | foreach { 
 			try {
 				$version = @{$true=$_.version;$false=""}[$SpecificVersion -eq $true];
 				$id = $_.id;
@@ -106,7 +131,8 @@ function Invoke-ProvisionRestore {
 			}
 		};
 	}
-	Invoke-DismInstall -Features ($packagesList | where { $_.source -imatch "^windows[Ff]eature$" });
+
+	Invoke-DismInstall -Features ($packagesList | where { $_.source -match "^windows[Ff]eature$" } | select -ExpandProperty ID);
 }
 
 function Invoke-ProvisionInstall {
@@ -140,28 +166,23 @@ function Invoke-ProvisionInstall {
 			& $wpi /Install /Products:$Name | Write-Host;
 		};
 		"^windows[fF]eature$" {
-			Invoke-DismInstall -Features @($Name);
+			$item = (Find-WindowsFeatures -Search $Name) | select -First 1;
+			if($item -ne $null) {
+				if($item.Enabled -ne $true) {
+					$dism = Get-DismExe;
+					Write-Host "$dism /Online /Enable-Feature /FeatureName:`"$Name`" /NoRestart $dall";
+					& $dism /Online /Enable-Feature /FeatureName:`"$Name`" /NoRestart $dall | Write-Host;
+				} else {
+					("Package '{0}' is already enabled. Skipping..." -f $Name) | Write-Host -BackgroundColor Gray -ForegroundColor Black;
+				}
+			} else {
+				("Package '{0}' is not available" -f $Name) | Write-Host -BackgroundColor Yellow -ForegroundColor Black;
+			}
 		};
 	}
 
 }
 
-function Invoke-DismInstall {
-	Param (
-		[Parameter(Mandatory=$true, Position=0)]
-		[Alias("f")]
-		[string[]] $Features
-	)
-	$dism = Get-DismExe;
-	$dall = (Get-DismAll);
-	# DISM can enable multiple features in one block.	
-	$featureOptions = "";
-	$Features | foreach {
-		$featureOptions += "/FeatureName:$_ " | Out-Null;
-	}
-	Write-Host "$dism /Online /Enable-Feature $featureOptions /NoRestart $dall";
-	& $dism /Online /Enable-Feature $featureOptions /NoRestart $dall | Write-Host;
-}
 
 function Invoke-ProvisionUninstall {
 	Param (
