@@ -6,6 +6,19 @@ function Invoke-InstallChocolatey {
 	iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1')) | Write-Host;
 }
 
+function Get-OSVersion {
+	$wmio = Get-WmiObject -class Win32_OperatingSystem | Select-Object Version, BuildNumber, Caption, OSArchitecture, ServicePackMajorVersion, ProductType
+
+	return [PSCustomObject]@{
+		Name = $wmio.Caption
+		BuildNumber = $wmio.BuildNumber
+		Architecture = $wmio.OSArchitecture
+		ServicePackMajorVersion = $wmio.ServicePackMajorVersion
+		Version = $wmio.Version
+		Server = @{$true=$true;$false=$false}[$wimo.ProductType -ne 1]
+	}
+}
+
 function Get-ChocolateyExe {
 	$cho = "$env:ProgramData\chocolatey\choco.exe";
 	if(!(Test-Path -Path $cho) ) {
@@ -24,6 +37,10 @@ function Get-DismExe {
 		throw [System.ArgumentException] "Unable to locate DISM.exe";
 	}
 	return $dism;
+}
+
+function Get-DismAll {
+	return @{$true="/All";$false=""}[(Get-OSVersion).BuildNumber -ge 9200];
 }
 
 function Get-WebPiExe {
@@ -64,7 +81,7 @@ function Invoke-ProvisionRestore {
 
 	$packagesList = $config.DocumentElement.SelectNodes("package") | where { $_.id -ne "Chocolatey"; };
 	if($gui -eq $true) {
-		$packagesList | Out-GridView -PassThru -Title "Select Packages" | sort { $_.source } -Descending | foreach { 
+		$packagesList | where { $_.source -inotmatch "^windows[Ff]eature$" } | Out-GridView -PassThru -Title "Select Packages" | foreach { 
 			try {
 				$version = @{$true=$_.version;$false=""}[$SpecificVersion -eq $true];
 				$id = $_.id;
@@ -74,9 +91,10 @@ function Invoke-ProvisionRestore {
 			} catch [System.Exception] {
 				Write-Error -Exception $_.Exception;
 			}
-		}
+		};
 	} else {
-		$packagesList | sort { $_.source } -Descending | foreach { 
+		# filter out windows features because they can be bundled.
+		$packagesList | where { $_.source -inotmatch "^windows[Ff]eature$" } | foreach { 
 			try {
 				$version = @{$true=$_.version;$false=""}[$SpecificVersion -eq $true];
 				$id = $_.id;
@@ -86,8 +104,9 @@ function Invoke-ProvisionRestore {
 			} catch [System.Exception] {
 				Write-Error -Exception $_.Exception;
 			}
-		}
+		};
 	}
+	Invoke-DismInstall -Features ($packagesList | where { $_.source -imatch "^windows[Ff]eature$" });
 }
 
 function Invoke-ProvisionInstall {
@@ -108,21 +127,40 @@ function Invoke-ProvisionInstall {
 		"^([Cc]hocolatey|install)$" {
 			$cho = Get-ChocolateyExe;
 			if($Version -ne $null -and $Version -ne "" ) {
-				& $cho install $Name -version $Version -y | Write-Host | Wait-Process;
+				Write-Host "$cho install $Name -version $Version -y";
+				& $cho install $Name -version $Version -y | Write-Host;
 			} else {
-				& $cho install $Name -y | Write-Host | Wait-Process;
+				Write-Host "$cho install $Name -y";
+				& $cho install $Name -y | Write-Host;
 			}
 		};
 		"^webpi$" {
 			$wpi = Get-WebPiExe;
-			& $wpi /Install /Products:$Name | Write-Host | Wait-Process (Get-Process webpicmd).id;
+			Write-Host "$wpi /Install /Products:$Name";
+			& $wpi /Install /Products:$Name | Write-Host;
 		};
-		"^windows[fF]eatures$" {
-			$dism = Get-DismExe;
-			& $dism /online /Enable-Feature /FeatureName:$Name /All | Write-Host | Wait-Process (Get-Process dism).id;
+		"^windows[fF]eature$" {
+			Invoke-DismInstall -Features @($Name);
 		};
 	}
 
+}
+
+function Invoke-DismInstall {
+	Param (
+		[Parameter(Mandatory=$true, Position=0)]
+		[Alias("f")]
+		[string[]] $Features
+	)
+	$dism = Get-DismExe;
+	$dall = (Get-DismAll);
+	# DISM can enable multiple features in one block.	
+	$featureOptions = "";
+	$Features | foreach {
+		$featureOptions += "/FeatureName:$_ " | Out-Null;
+	}
+	Write-Host "$dism /Online /Enable-Feature $featureOptions /NoRestart $dall";
+	& $dism /Online /Enable-Feature $featureOptions /NoRestart $dall | Write-Host;
 }
 
 function Invoke-ProvisionUninstall {
@@ -147,7 +185,7 @@ function Invoke-ProvisionUninstall {
 		};
 		"^windows[fF]eatures$" {
 			$dism = Get-DismExe;
-			& $dism /online /Disable-Feature /FeatureName:$Name;
+			& $dism /Online /Disable-Feature /FeatureName:$Name;
 		};
 	}
 }
@@ -302,9 +340,9 @@ function Find-ChocolateyPackages {
 			$ver = (Select-String -InputObject $_ -Pattern "\s([\S]+)\s?$" -AllMatches | % { $_.Matches } | % { $_.Value }) -replace "\s","";
 			$packages.Add( [PSCustomObject]@{
 				ID = $id;
-				Version = $ver
-				Source = "Chocolatey"
-				Category = "Chocolatey"
+				Version = $ver;
+				Source = "Chocolatey";
+				Category = "Chocolatey";
 			} ) | Out-Null;
 		}
 	}
