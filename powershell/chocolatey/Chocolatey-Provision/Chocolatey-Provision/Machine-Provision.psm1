@@ -1,3 +1,4 @@
+# requires -version 3
 <#
 	
 #>
@@ -64,8 +65,10 @@ function Invoke-DismInstall {
 
 	# DISM can enable multiple features in one block.	
 	$featureOptions = $newFeatures -join ",";
-	Write-Host "$dism /Online /Enable-Feature /FeatureName:$featureOptions /NoRestart $dall";
-	& $dism /Online /Enable-Feature $featureOptions /NoRestart $dall | Write-Host;
+	if($featureOptions -ne "" -and $featureOptions -ne $null) {
+		Write-Host "$dism /Online /Enable-Feature /FeatureName:$featureOptions /NoRestart $dall";
+		& $dism /Online /Enable-Feature $featureOptions /NoRestart $dall | Write-Host;
+	}
 }
 
 function Get-WebPiExe {
