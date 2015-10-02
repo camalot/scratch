@@ -76,7 +76,7 @@ function Get-WebPiExe {
 	$wpiloc = $wpi | where { Test-Path -Path $_ } | Select-Object -First 1;
 	if($wpiloc -eq $null) {
 		Write-Host -BackgroundColor Red -ForegroundColor White "Unable to locate webpi. Installing webpi...";
-		Invoke-ProvisionInstall -Name "webpi" -Source "Chocolatey";
+		Invoke-ProvisionInstall -Name "webpi" -Action "Chocolatey";
 		$wpiloc = $wpi | where { Test-Path -Path $_ } | Select-Object -First 1;
 		if($wpiloc -eq $null) {
 			throw [System.IO.FileNotFoundException] "Still unable to locate webpi, even after install attempt."
@@ -109,33 +109,33 @@ function Invoke-ProvisionRestore {
 
 	$packagesList = $config.DocumentElement.SelectNodes("package") | where { $_.id -ne "Chocolatey"; };
 	if($gui -eq $true) {
-		$packagesList | where { $_.source -notmatch "^windows[Ff]eature$" } | Out-GridView -PassThru -Title "Select Packages" | foreach { 
+		$packagesList | where { $_.action -notmatch "^windows[Ff]eature$" } | Out-GridView -PassThru -Title "Select Packages" | foreach { 
 			try {
 				$version = @{$true=$_.version;$false=""}[$SpecificVersion -eq $true];
 				$id = $_.id;
-				$source = $_.source;
-				Write-Host "Invoke-ProvisionInstall: -Name $id -Version $version -Source $source";
-				Invoke-ProvisionInstall -Name $id -Version $version -Source $_.source;
+				$action = $_.action;
+				Write-Host "Invoke-ProvisionInstall: -Name $id -Version $version -Action $action";
+				Invoke-ProvisionInstall -Name $id -Version $version -Action $_.action;
 			} catch [System.Exception] {
 				Write-Error -Exception $_.Exception;
 			}
 		};
 	} else {
 		# filter out windows features because they can be bundled.
-		$packagesList | where { $_.source -notmatch "^windows[Ff]eature$" } | foreach { 
+		$packagesList | where { $_.action -notmatch "^windows[Ff]eature$" } | foreach { 
 			try {
 				$version = @{$true=$_.version;$false=""}[$SpecificVersion -eq $true];
 				$id = $_.id;
-				$source = $_.source;
-				Write-Host "Invoke-ProvisionInstall: -Name $id -Version $version -Source $source";
-				Invoke-ProvisionInstall -Name $id -Version $version -Source $_.source;
+				$action = $_.action;
+				Write-Host "Invoke-ProvisionInstall: -Name $id -Version $version -Action $action";
+				Invoke-ProvisionInstall -Name $id -Version $version -Action $_.action;
 			} catch [System.Exception] {
 				Write-Error -Exception $_.Exception;
 			}
 		};
 	}
 
-	Invoke-DismInstall -Features ($packagesList | where { $_.source -match "^windows[Ff]eature$" } | select -ExpandProperty ID);
+	Invoke-DismInstall -Features ($packagesList | where { $_.action -match "^windows[Ff]eature$" } | select -ExpandProperty ID);
 }
 
 function Invoke-ProvisionInstall {
@@ -147,12 +147,12 @@ function Invoke-ProvisionInstall {
 		[Alias("v")]
 		[string] $Version = $null,
 		[Parameter(Mandatory=$false, Position=2)]
-		[Alias("s")]
-		[string] $Source = "install"
+		[Alias("a")]
+		[string] $Action = "install"
 	);
 	Check-RunAsAdministrator;
 
-	switch -regex ($Source) {
+	switch -regex ($Action) {
 		"^([Cc]hocolatey|install)$" {
 			$cho = Get-ChocolateyExe;
 			if($Version -ne $null -and $Version -ne "" ) {
@@ -186,6 +186,28 @@ function Invoke-ProvisionInstall {
 
 }
 
+function Invoke-ChocolateyUpdate {
+	Param (
+		[Parameter(Mandatory=$false, Position=0)]
+		[Alias("f")]
+		[string] $FilePath,
+		[Parameter(Mandatroy=$false,Position=1)]
+		[Alias("pre")]
+		[bool] $prerelease = $false
+	);
+	Check-RunAsAdministrator;
+	$cho = Get-ChocolateyExe;
+	$configFile = (Get-Item -Path $FilePath);
+
+	if(!(Test-Path -Path $configFile)) {
+		throw [System.IO.FileNotFoundException] "Unable to locate config file: '$configFile'";
+	}
+
+	[xml]$config = (Get-Content $configFile.FullName -Raw);
+	$usePre = @{$true="-pre ";$false=""}[$prerelease -eq $true];
+	$packages = ($config.DocumentElement.SelectNodes("package") | where { $_.action -imatch "^(chocolatey|install)$" -and $_.id -inotmatch "chocolatey"; } | select -ExpandProperty id ) -join " ";
+	& $cho upgrade $packages $usePre | Write-Host;
+}
 
 function Invoke-ProvisionUninstall {
 	Param (
@@ -193,13 +215,13 @@ function Invoke-ProvisionUninstall {
 		[Alias("n")]
 		[string] $Name,
 		[Parameter(Mandatory=$false, Position=1)]
-		[Alias("s")]
-		[string] $Source = "install"
+		[Alias("a")]
+		[string] $Action = "install"
 	);
 
 	Check-RunAsAdministrator;
 
-	switch($Source) {
+	switch($Action) {
 		"^([Cc]hocolatey|install)$" {
 			$cho = Get-ChocolateyExe;
 			& $cho uninstall $Name -version $Version -y;
@@ -222,7 +244,7 @@ function Get-AvailableWindowsFeatures {
 		ID = ""
 		Enabled = $false
 		Category = "Windows"
-		Source = "windowsFeature"
+		Action = "windowsFeature"
 	};
 	Write-Host "Gathering Available System Features...";
 	& $dism /online /Get-Features | where { $_ -match "^(Feature\sName|^State)\s\:\s(.*?)`$" } | foreach {
@@ -232,7 +254,7 @@ function Get-AvailableWindowsFeatures {
 					ID = $matches[2]
 					Enabled = $false
 					Category = "Windows"
-					Source = "windowsFeature"
+					Action = "windowsFeature"
 				};
 			}
 			"State" {
@@ -269,7 +291,7 @@ function Get-AvailableWebPlatformInstallPackages {
 			Name = ""
 			ID = ""
 			Category = $currentCategory
-			Source = "webpi"
+			Action = "webpi"
 		}
 		Write-Host "Gathering Available Web Platform Features...";
 		Invoke-Command { & $wpi /List /ListOption:All } | where { $_ -ne "" -and $_ -ne $null -and ( $_ -imatch "^(--)[a-z0-9]" -or $_ -imatch "^[a-z0-9]") -and ($_ -inotmatch "^ID\s+Title`$") -and ( ($_ -inotmatch "^the\ssoftware\sthat\s") -and $_ -inotmatch "^successfully\sloaded\s" )} | foreach {
@@ -285,7 +307,7 @@ function Get-AvailableWebPlatformInstallPackages {
 					Name = $name
 					ID = $id
 					Category = $currentCategory
-					Source = "webpi"
+					Action = "webpi"
 				}
 				$items.Add($curItem) | Out-Null;
 			}
@@ -318,7 +340,7 @@ function Get-InstalledChocolateyPackages {
 				ID = $id;
 				Version = $ver
 				Category = "Chocolatey"
-				Source = "Chocolatey"
+				Action = "install"
 			} ) | Out-Null;
 		}
 	}
@@ -338,7 +360,7 @@ function Get-AvailableChocolateyPackages {
 			$packages.Add( [PSCustomObject]@{
 				ID = $id;
 				Version = $ver
-				Source = "Chocolatey"
+				Action = "install"
 				Category = "Chocolatey"
 			} ) | Out-Null;
 		}
@@ -365,7 +387,7 @@ function Find-ChocolateyPackages {
 			$packages.Add( [PSCustomObject]@{
 				ID = $id;
 				Version = $ver;
-				Source = "Chocolatey";
+				Action = "install";
 				Category = "Chocolatey";
 			} ) | Out-Null;
 		}
@@ -379,7 +401,7 @@ function Get-AllInstalledPackages {
 	$wpi = Get-AvailableWebPlatformInstallPackages | where { $_.Category -eq "Previously Installed Products" };
 	$wf = Get-AvailableWindowsFeatures | where { $_.Enabled -eq $true };
 	$choco = Get-InstalledChocolateyPackages;
-	return (( $wpi | Select-Object ID, Source, Category ) + ( $wf |  Select-Object ID, Source, Category ) + ( $choco | Select-Object ID, Source, Category, Version ) ) | sort { $_.Source, $_.ID };
+	return (( $wpi | Select-Object ID, Action, Category ) + ( $wf |  Select-Object ID, Action, Category ) + ( $choco | Select-Object ID, Action, Category, Version ) ) | sort { $_.Action, $_.ID };
 }
 
 function Get-ProvisionPackageConfig {
@@ -389,12 +411,12 @@ function Get-ProvisionPackageConfig {
 	Get-AllInstalledPackages | foreach {
 		$id = $_.ID;
 		$version = $_.Version;
-		# if the source is chocolatey, change to "install" because that is the command for choco.
-		$source = @{$true="install";$false=$_.Source}[$_.Source -eq 'Chocolatey'];
+		# if the action is chocolatey, change to "install" because that is the command for choco.
+		$action = @{$true="install";$false=$_.Action}[$_.Action -eq 'Chocolatey'];
 		if( $version -eq "" -or $version -eq $null ) {
-			"  <package id=`"$id`" source=`"$source`" />";
+			"  <package id=`"$id`" action=`"$action`" />";
 		} else {
-			"  <package id=`"$id`" source=`"$source`" version=`"$version`" />";
+			"  <package id=`"$id`" action=`"$action`" version=`"$version`" />";
 		}
   };
   "</packages>";
@@ -421,9 +443,9 @@ function Find-ProvisionPackages {
 	$wf = Find-WindowsFeatures -Search $Search;
 	$choco = Find-ChocolateyPackages -Search $Search;
 
-	(( $wpi | Select-Object ID, Source, Category ) + 
-		( $wf |  Select-Object ID, Source, Category ) + 
-		( $choco | Select-Object ID, Source, Version, Category ) ) | sort { $_.Source, $_.Category, $_.ID };
+	(( $wpi | Select-Object ID, Action, Category ) + 
+		( $wf |  Select-Object ID, Action, Category ) + 
+		( $choco | Select-Object ID, Action, Version, Category ) ) | sort { $_.Action, $_.Category, $_.ID };
 }
 
 function Check-RunAsAdministrator {
@@ -438,6 +460,7 @@ Export-ModuleMember -Function Out-ProvisionPackageConfig;
 
 Export-ModuleMember -Function Invoke-ProvisionInstall;
 Export-ModuleMember -Function Invoke-ProvisionRestore;
+Export-ModuleMember -Function Invoke-ChocolateyUpdate;
 
 Export-ModuleMember -Function Get-InstalledChocolateyPackages;
 Export-ModuleMember -Function Get-AvailableWebPlatformInstallPackages;
