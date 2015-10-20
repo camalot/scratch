@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "PackageManagement", "PackageManagement\PackageManagement.pssproj", "{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}"
+EndProject
+Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "sqlps.2014", "sqlps.2014\sqlps.2014.pssproj", "{0221F6C2-2C12-4B47-81EB-1970631C9F50}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".build", ".build", "{F0DB76B2-1BF4-4026-9992-2F57984A7B63}"
+	ProjectSection(SolutionItems) = preProject
+		.build\Build.msbuild = .build\Build.msbuild
+		.build\CIProperties.msbuild = .build\CIProperties.msbuild
+		.build\Pack.msbuild = .build\Pack.msbuild
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".targets", ".targets", "{A7FC0697-D154-41C5-BA0E-01603B4848D3}"
+	ProjectSection(SolutionItems) = preProject
+		.build\MSBuild.Community.Tasks.dll = .build\MSBuild.Community.Tasks.dll
+		.build\MSBuild.Community.Tasks.targets = .build\MSBuild.Community.Tasks.targets
+		.build\MSBuild.Deployment.Tasks.dll = .build\MSBuild.Deployment.Tasks.dll
+		.build\MSBuild.Deployment.Tasks.pdb = .build\MSBuild.Deployment.Tasks.pdb
+		.build\MSBuild.Deployment.Tasks.Targets = .build\MSBuild.Deployment.Tasks.Targets
+		.build\MSBuild.Deployment.Tasks.XML = .build\MSBuild.Deployment.Tasks.XML
+		.build\MSBuild.Deployment.Tasks.xsd = .build\MSBuild.Deployment.Tasks.xsd
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0221F6C2-2C12-4B47-81EB-1970631C9F50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0221F6C2-2C12-4B47-81EB-1970631C9F50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0221F6C2-2C12-4B47-81EB-1970631C9F50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0221F6C2-2C12-4B47-81EB-1970631C9F50}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A7FC0697-D154-41C5-BA0E-01603B4848D3} = {F0DB76B2-1BF4-4026-9992-2F57984A7B63}
+	EndGlobalSection
+EndGlobal

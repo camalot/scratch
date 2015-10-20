@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. -->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <!-- Read this before publishing packages to chocolatey.org: https://github.com/chocolatey/chocolatey/wiki/CreatePackages -->
+    <id>sqlps.2014</id>
+    <title>Microsoft® Windows PowerShell Extensions for Microsoft SQL Server® 2014</title>
+    <version>12.0.2000.8</version>
+    <authors>Microsoft</authors>
+    <owners>Microsoft</owners>
+    <summary>Microsoft® Windows PowerShell Extensions for Microsoft SQL Server® 2014</summary>
+    <description>The Microsoft Windows PowerShell Extensions for SQL Server 2014 includes a provider and a set of cmdlets that enable administrators and developers to build PowerShell scripts for managing instances of SQL Server. 
+    The SQL Server PowerShell Provider delivers a simple mechanism for navigating SQL Server instances that is similar to file system paths. 
+    PowerShell scripts can then use the SQL Server Management Objects to administer the instances. 
+    The SQL Server cmdlets support operations such as executing Transact-SQL scripts or evaluating SQL Server policies.</description>
+    <projectUrl>http://www.microsoft.com/en-us/download/details.aspx?id=42295</projectUrl>
+    <packageSourceUrl>http://www.microsoft.com/en-us/download/details.aspx?id=42295</packageSourceUrl>
+    <!--<projectSourceUrl></projectSourceUrl>
+    <docsUrl></docsUrl>
+    <mailingListUrl></mailingListUrl>
+    <bugTrackerUrl></bugTrackerUrl>-->
+    <tags>sqlps.2014 mssql sql</tags>
+    <copyright>Copyright (c) Microsoft 2015</copyright>
+    <licenseUrl>http://www.microsoft.com/en-us/download/details.aspx?id=42295</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <!--<iconUrl>http://cdn.rawgit.com/__REPLACE_YOUR_REPO__/master/icons/sqlps.2014.png</iconUrl>-->
+    <!--<dependencies>
+      <dependency id="" version="__VERSION__" />
+      <dependency id="" />
+    </dependencies>-->
+    <releaseNotes></releaseNotes>
+    <!--<provides></provides>-->
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+  <!--<dependencies>
+    --><!-- Chocolatey 0.9.9 required in order to access the chocolateyPackageName and chocolateyPackageVersion environment variables --><!--
+    <dependency id="chocolatey" version="0.9.9" />
+    <dependency id="smo.2014" />
+  </dependencies>-->
+</package>

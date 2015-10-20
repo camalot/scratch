@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0" DefaultTargets="Build">
+	<Target Name="Build">
+
+		<MSBuild Projects="$(MSBuildProjectDirectory)\Pack.msbuild" ContinueOnError="false"
+						 Properties="CI_PROJECT_NAME=sqlps.2014">
+			<Output ItemName="OutputFiles" TaskParameter="TargetOutputs"/>
+		</MSBuild>
+
+
+		<MSBuild Projects="$(MSBuildProjectDirectory)\Pack.msbuild" ContinueOnError="false"
+						 Properties="CI_PROJECT_NAME=PackageManagement">
+			<Output ItemName="OutputFiles" TaskParameter="TargetOutputs"/>
+		</MSBuild>
+		
+	</Target>
+</Project>
