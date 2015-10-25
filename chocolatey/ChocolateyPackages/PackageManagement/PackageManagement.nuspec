@@ -11,7 +11,6 @@
     <summary>PackageManagement PowerShell Modules for PowerShell 3 and PowerShell 4</summary>
     <description>Preview release includes PackageManagement (previously known as OneGet) and PowerShellGet Windows PowerShell modules for PowerShell 3 and PowerShell 4.</description>
     <projectUrl>https://www.microsoft.com/en-us/download/details.aspx?id=49186</projectUrl>
-    <packageSourceUrl>https://www.microsoft.com/en-us/download/details.aspx?id=49186</packageSourceUrl>
     <!--<projectSourceUrl></projectSourceUrl>
     <docsUrl></docsUrl>
     <mailingListUrl></mailingListUrl>
@@ -21,11 +20,10 @@
 		<licenseUrl>https://www.microsoft.com/en-us/download/details.aspx?id=49186</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <!--<iconUrl>http://cdn.rawgit.com/__REPLACE_YOUR_REPO__/master/icons/sqlps.2014.png</iconUrl>-->
-    <!--<dependencies>
-      <dependency id="" version="__VERSION__" />
-      <dependency id="" />
-    </dependencies>-->
-    <releaseNotes></releaseNotes>
+		<dependencies>
+			<dependency id="powershell" version="[3.0,4.9]" />
+		</dependencies>
+		<releaseNotes></releaseNotes>
     <!--<provides></provides>-->
   </metadata>
   <files>

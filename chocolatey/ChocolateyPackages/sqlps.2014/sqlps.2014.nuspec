@@ -24,19 +24,14 @@
     <licenseUrl>http://www.microsoft.com/en-us/download/details.aspx?id=42295</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <!--<iconUrl>http://cdn.rawgit.com/__REPLACE_YOUR_REPO__/master/icons/sqlps.2014.png</iconUrl>-->
-    <!--<dependencies>
-      <dependency id="" version="__VERSION__" />
-      <dependency id="" />
-    </dependencies>-->
+		<dependencies>
+			<dependency id="smo.2014" />
+		</dependencies>
     <releaseNotes></releaseNotes>
     <!--<provides></provides>-->
   </metadata>
   <files>
     <file src="tools\**" target="tools" />
   </files>
-  <!--<dependencies>
-    --><!-- Chocolatey 0.9.9 required in order to access the chocolateyPackageName and chocolateyPackageVersion environment variables --><!--
-    <dependency id="chocolatey" version="0.9.9" />
-    <dependency id="smo.2014" />
-  </dependencies>-->
+
 </package>
