@@ -1,0 +1,1 @@
+@powershell -File ".\teamspeak3-server-update.ps1" -Path .\ -Use64bit
