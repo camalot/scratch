@@ -72,7 +72,7 @@ function Invoke-DismInstall {
 }
 
 function Get-WebPiExe {
-	$wpi = @("$env:ProgramFiles\microsoft\web platform installer\webpicmd.exe", "${env:ProgramFiles(x86)}\microsoft\web platform installer\webpicmd.exe", "webpicmd.exe");
+	$wpi = @("${env:ProgramFiles}\microsoft\web platform installer\webpicmd-x64.exe", "${env:ProgramFiles}\microsoft\web platform installer\webpicmd.exe", "${env:ProgramFiles(x86)}\microsoft\web platform installer\webpicmd.exe", "webpicmd.exe");
 	$wpiloc = $wpi | where { Test-Path -Path $_ } | Select-Object -First 1;
 	if($wpiloc -eq $null) {
 		Write-Host -BackgroundColor Red -ForegroundColor White "Unable to locate webpi. Installing webpi...";
@@ -82,6 +82,9 @@ function Get-WebPiExe {
 			throw [System.IO.FileNotFoundException] "Still unable to locate webpi, even after install attempt."
 		}
 	}
+	
+	# http://download.microsoft.com/download/C/F/F/CFF3A0B8-99D4-41A2-AE1A-496C08BEB904/WebPlatformInstaller_amd64_en-US.msi
+	
 	return $wpi;
 }
 
@@ -191,7 +194,7 @@ function Invoke-ChocolateyUpdate {
 		[Parameter(Mandatory=$false, Position=0)]
 		[Alias("f")]
 		[string] $FilePath,
-		[Parameter(Mandatroy=$false,Position=1)]
+		[Parameter(Mandatory=$false,Position=1)]
 		[Alias("pre")]
 		[bool] $prerelease = $false
 	);
