@@ -438,7 +438,7 @@ function Out-ProvisionPackageConfig {
 	)
   Check-RunAsAdministrator;
 	$parentFolder = Split-Path -Path $FilePath -Parent;
-	if (!Test-Path -Path $parentFolder) {
+	if (!(Test-Path -Path $parentFolder)) {
 		New-Item -Path $parentFolder -ItemType Directory | Out-Null;
 	}
 	Get-ProvisionPackageConfig | Out-File -FilePath $FilePath -Force;
