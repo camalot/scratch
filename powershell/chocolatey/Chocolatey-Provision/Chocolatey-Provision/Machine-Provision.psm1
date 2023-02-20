@@ -270,6 +270,8 @@ function Get-AvailableWindowsFeatures {
 					$curItem.Enabled = $false;
 				} elseif ($matches[2] -eq "Enabled") {
 					$curItem.Enabled = $true;
+				} elseif ($matches[2] -eq "Enabled Pending") {
+					$curItem.Enabled = $true;
 				} else {
 					throw [System.ArgumentException] "Unknown status for the state";
 				}
